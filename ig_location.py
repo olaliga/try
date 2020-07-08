@@ -7,15 +7,24 @@ import os
 import time
 import numpy as np
 import multiprocessing as mp
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
-session = requests_html.HTMLSession()
+# 创建chrome启动选项
+chrome_options = webdriver.ChromeOptions()
+# 指定chrome启动类型为headless 并且禁用gpu
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--disable-gpu')
+
 os.chdir('location_data') # saving file
 
 def crawler(url,param = None):  # ,cookie):
-    r = session.get(url, params = param)
-    r.encoding = 'utf-8'
-    r.html.render(timeout = 800000)  # , cookies = cookie)
-    return r
+    chromedriver = '/usr/local/bin/chromedriver'
+    driver = webdriver.Chrome(chromedriver)
+    driver.get(url)  # 前往這個網址
+    back = driver.page_source
+    driver.close() # , cookies = cookie)
+    return back
 
 Base_url = 'https://www.instagram.com/explore/locations/'
 # location
@@ -28,7 +37,7 @@ city_list = []
 while i == 0 or next_page != None:
     i += 1
     r = crawler(url + '?page=' + str(i))
-    soup = BeautifulSoup(r.text, "lxml")
+    soup = BeautifulSoup(r, "lxml")
     scripts = soup.find_all('script')
     for t in scripts:
         try:
@@ -48,7 +57,7 @@ location_list = []
 while i == 0 or next_page != None:
     i += 1
     r1 = crawler(url_1 + '?page=' + str(i))
-    soup1 = BeautifulSoup(r1.text, "lxml")
+    soup1 = BeautifulSoup(r1, "lxml")
     scripts1 = soup1.find_all('script')
     for t in scripts1:
         try:
